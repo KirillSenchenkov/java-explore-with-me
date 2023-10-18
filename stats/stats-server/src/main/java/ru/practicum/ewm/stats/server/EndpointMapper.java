@@ -9,11 +9,19 @@ public class EndpointMapper {
 
     public EndpointHit dtoToHit(EndpointHitDto dto) {
         return new EndpointHit(
-                dto.getId(),
                 dto.getApp(),
                 dto.getUri(),
                 dto.getIp(),
                 dto.getTimestamp()
+        );
+    }
+
+    public EndpointHitDto hitToDto(EndpointHit hit) {
+        return new EndpointHitDto(
+                hit.getApp(),
+                hit.getUri(),
+                hit.getIp(),
+                hit.getTimestamp()
         );
     }
 }

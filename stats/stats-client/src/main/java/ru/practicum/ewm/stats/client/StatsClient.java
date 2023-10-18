@@ -1,24 +1,32 @@
 package ru.practicum.ewm.stats.client;
 
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import ru.practicum.ewm.stats.dto.EndpointHitDto;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 
 @Service
-public class StatsClient extends BaseClient {
+public class StatsClient {
+    @Value("${client.url}")
+    private String serverUrl;
+    private final RestTemplate rest;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    @Value("${server.url}")
-    String serverUrl;
-
-    public StatsClient(RestTemplate rest) {
-        super(rest);
+    public StatsClient() {
+        this.rest = new RestTemplate();
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+        rest.setRequestFactory(requestFactory);
     }
 
     public ResponseEntity<Object> createHit(EndpointHitDto dto) {
@@ -31,17 +39,25 @@ public class StatsClient extends BaseClient {
     }
 
     public ResponseEntity<Object> getStats(List<String> uris, LocalDateTime start, LocalDateTime end, Boolean unique) {
-        Map<String, Object> params = new HashMap<>(Map.of(
-                "uris", uris,
-                "start", start,
-                "end", end,
-                "unique", unique));
+        StringBuilder url = new StringBuilder(serverUrl + "/stats?");
+        for (String uri : uris) {
+            url.append("&uris=").append(uri);
+        }
+        url.append("&unique=").append(unique);
+        url.append("&start=").append(start.format(formatter));
+        url.append("&end=").append(end.format(formatter));
 
-        ResponseEntity<Object> response = rest.postForEntity(serverUrl + "/hit", params, Object.class);
+        ResponseEntity<Object> response;
+        try {
+            response = rest.exchange(url.toString(), HttpMethod.GET, null, Object.class);
+        } catch (HttpStatusCodeException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsByteArray());
+        }
         ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.status(response.getStatusCode());
         if (response.hasBody()) {
             return responseBuilder.body(response.getBody());
         }
         return responseBuilder.build();
     }
+
 }
