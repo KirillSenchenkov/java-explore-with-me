@@ -22,9 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.ewm.request.model.RequestStatus.CONFIRMED;
-import static ru.practicum.ewm.request.model.RequestStatus.PENDING;
-import static ru.practicum.ewm.request.model.RequestStatus.REJECTED;
+import static ru.practicum.ewm.request.model.RequestStatus.*;
 
 @Service
 @AllArgsConstructor

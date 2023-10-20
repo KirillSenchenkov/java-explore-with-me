@@ -86,11 +86,20 @@ public class CompilationService {
         if (pinned != null) {
             List<Compilation> compilations = compilationRepository.findAllByPinned(pinned, pageable);
             List<CompilationDto> result = new ArrayList<>();
+            List<ConfirmedRequests> confirmedRequestsList = requestRepository.findAllByStatus(CONFIRMED);
             for (Compilation compilation : compilations) {
                 CompilationDto compilationDto = CompilationMapper.compilationToDto(compilation);
                 if (compilation.getEvents() != null) {
                     List<Long> ids = compilation.getEvents().stream().map(Event::getId).collect(Collectors.toList());
-                    Map<Long, Long> confirmedRequests = requestRepository.findAllByEventIdInAndStatus(ids, CONFIRMED)
+                    List<ConfirmedRequests> sortedConfirmedRequests = new ArrayList<>();
+                    for (Long id : ids) {
+                        for (ConfirmedRequests confirmedRequest : confirmedRequestsList) {
+                            if (confirmedRequest.getEvent().equals(id)) {
+                                sortedConfirmedRequests.add(confirmedRequest);
+                            }
+                        }
+                    }
+                    Map<Long, Long> confirmedRequests = sortedConfirmedRequests
                             .stream()
                             .collect(Collectors.toMap(ConfirmedRequests::getEvent, ConfirmedRequests::getCount));
                     compilationDto.setEvents(compilation.getEvents().stream()
@@ -103,11 +112,20 @@ public class CompilationService {
         } else {
             List<Compilation> compilations = compilationRepository.findAll(pageable).getContent();
             List<CompilationDto> result = new ArrayList<>();
+            List<ConfirmedRequests> confirmedRequestsList = requestRepository.findAllByStatus(CONFIRMED);
             for (Compilation compilation : compilations) {
                 CompilationDto compilationDto = CompilationMapper.compilationToDto(compilation);
                 if (compilation.getEvents() != null) {
                     List<Long> ids = compilation.getEvents().stream().map(Event::getId).collect(Collectors.toList());
-                    Map<Long, Long> confirmedRequests = requestRepository.findAllByEventIdInAndStatus(ids, CONFIRMED)
+                    List<ConfirmedRequests> sortedConfirmedRequests = new ArrayList<>();
+                    for (Long id : ids) {
+                        for (ConfirmedRequests confirmedRequest : confirmedRequestsList) {
+                            if (confirmedRequest.getEvent().equals(id)) {
+                                sortedConfirmedRequests.add(confirmedRequest);
+                            }
+                        }
+                    }
+                    Map<Long, Long> confirmedRequests = sortedConfirmedRequests
                             .stream()
                             .collect(Collectors.toMap(ConfirmedRequests::getEvent, ConfirmedRequests::getCount));
                     compilationDto.setEvents(compilation.getEvents().stream()

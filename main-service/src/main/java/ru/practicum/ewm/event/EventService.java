@@ -2,9 +2,7 @@ package ru.practicum.ewm.event;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -16,13 +14,7 @@ import ru.practicum.ewm.categories.CategoryMapper;
 import ru.practicum.ewm.categories.CategoryRepository;
 import ru.practicum.ewm.categories.CategoryService;
 import ru.practicum.ewm.categories.model.Category;
-import ru.practicum.ewm.event.dto.EventFullDto;
-import ru.practicum.ewm.event.dto.EventFullDtoWithViews;
-import ru.practicum.ewm.event.dto.EventShortDto;
-import ru.practicum.ewm.event.dto.EventShortDtoWithViews;
-import ru.practicum.ewm.event.dto.NewEventDto;
-import ru.practicum.ewm.event.dto.UpdateEventAdminRequest;
-import ru.practicum.ewm.event.dto.UpdateEventUserRequest;
+import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.model.State;
 import ru.practicum.ewm.event.model.StateAdmin;
@@ -60,17 +52,17 @@ import static ru.practicum.ewm.request.model.RequestStatus.CONFIRMED;
 @Service
 @RequiredArgsConstructor
 @Transactional
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class EventService {
-    final EventRepository eventRepository;
-    final UserRepository userRepository;
-    final CategoryRepository categoryRepository;
-    final CategoryService categoryService;
-    final LocationRepository locationRepository;
-    final RequestRepository requestRepository;
-    final StatsClient statsClient;
+    private final EventRepository eventRepository;
+    private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
+    private final CategoryService categoryService;
+    private final LocationRepository locationRepository;
+    private final RequestRepository requestRepository;
+    private final StatsClient statsClient;
     @Value("${app}")
-    String app;
+    private String app;
+    private static final LocalDateTime ACTUAL_TIME = LocalDateTime.now();
 
     public EventFullDto createEvent(Long userId, NewEventDto newEventDto) {
         checkActualTime(newEventDto.getEventDate());
@@ -84,7 +76,7 @@ public class EventService {
         event.setInitiator(user);
         event.setCategory(category);
         event.setLocation(location);
-        event.setCreatedOn(LocalDateTime.now());
+        event.setCreatedOn(ACTUAL_TIME);
         event.setState(PENDING);
         return EventMapper.eventToEventFullDto(eventRepository.save(event), 0L);
     }
@@ -153,7 +145,7 @@ public class EventService {
             }
             if (stateAction.equals(PUBLISH_EVENT)) {
                 event.setState(PUBLISHED);
-                event.setPublishedOn(LocalDateTime.now());
+                event.setPublishedOn(ACTUAL_TIME);
             } else if (stateAction.equals(REJECT_EVENT)) {
                 event.setState(State.CANCELED);
             }
@@ -249,7 +241,7 @@ public class EventService {
                 .map(Event::getCreatedOn)
                 .min(LocalDateTime::compareTo)
                 .orElseThrow(() -> new NotFoundException("Время начала события не задано"));
-        ResponseEntity<Object> response = statsClient.getStats(uris, start, LocalDateTime.now(), true);
+        ResponseEntity<Object> response = statsClient.getStats(uris, start, ACTUAL_TIME, true);
         List<Long> ids = events.stream().map(Event::getId).collect(Collectors.toList());
         Map<Long, Long> confirmedRequests = requestRepository.findAllByEventIdInAndStatus(ids, CONFIRMED).stream()
                 .collect(Collectors.toMap(ConfirmedRequests::getEvent, ConfirmedRequests::getCount));
@@ -291,8 +283,7 @@ public class EventService {
             specification = specification.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.equal(root.get("paid"), paid));
         }
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startDateTime = Objects.requireNonNullElseGet(rangeStart, () -> now);
+        LocalDateTime startDateTime = Objects.requireNonNullElseGet(rangeStart, () -> ACTUAL_TIME);
         specification = specification.and((root, query, criteriaBuilder) ->
                 criteriaBuilder.greaterThan(root.get("eventDate"), startDateTime));
         if (rangeEnd != null) {
@@ -325,7 +316,7 @@ public class EventService {
                 .map(Event::getCreatedOn)
                 .min(LocalDateTime::compareTo)
                 .orElseThrow(() -> new NotFoundException("Время начала события не задано"));
-        ResponseEntity<Object> response = statsClient.getStats(uris, start, LocalDateTime.now(),true);
+        ResponseEntity<Object> response = statsClient.getStats(uris, start, ACTUAL_TIME, true);
         List<Long> ids = events.stream().map(Event::getId).collect(Collectors.toList());
         Map<Long, Long> confirmedRequests = requestRepository.findAllByEventIdInAndStatus(ids, CONFIRMED)
                 .stream()
@@ -343,7 +334,7 @@ public class EventService {
             }
         }
         EndpointHitDto hit = new EndpointHitDto(app, request.getRequestURI(), request.getRemoteAddr(),
-                LocalDateTime.now());
+                ACTUAL_TIME);
         statsClient.createHit(hit);
         return result;
     }
@@ -355,7 +346,7 @@ public class EventService {
             throw new NotFoundException("Событие не опубликовано");
         }
         ResponseEntity<Object> response = statsClient.getStats(List.of(request.getRequestURI()),
-                event.getCreatedOn(), LocalDateTime.now(), true);
+                event.getCreatedOn(), ACTUAL_TIME, true);
         ObjectMapper mapper = new ObjectMapper();
         List<ViewStats> statsDto = mapper.convertValue(response.getBody(), new TypeReference<>() {
         });
@@ -368,13 +359,13 @@ public class EventService {
                     requestRepository.countByEventIdAndStatus(eventId, CONFIRMED));
         }
         EndpointHitDto hit = new EndpointHitDto(app, request.getRequestURI(), request.getRemoteAddr(),
-                LocalDateTime.now());
+                ACTUAL_TIME);
         statsClient.createHit(hit);
         return result;
     }
 
     protected void checkActualTime(LocalDateTime eventTime) {
-        if (eventTime.isBefore(LocalDateTime.now().plusHours(2))) {
+        if (eventTime.isBefore(ACTUAL_TIME.plusHours(2))) {
             throw new ValidationException("Запрос не прошел валидацию");
         }
     }

@@ -1,11 +1,13 @@
 package ru.practicum.ewm.location.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 public class LocationDto {
     @NotNull

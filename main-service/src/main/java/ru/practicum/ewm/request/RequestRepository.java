@@ -27,4 +27,10 @@ public interface RequestRepository extends JpaRepository<ParticipationRequest, L
             "WHERE r.event.id IN (:ids) AND r.status = :status " +
             "GROUP BY (r.event)")
     List<ConfirmedRequests> findAllByEventIdInAndStatus(@Param("ids")List<Long> ids, @Param("status")RequestStatus status);
+
+    @Query("SELECT new ru.practicum.ewm.request.dto.ConfirmedRequests(COUNT(DISTINCT r.id), r.event.id) " +
+            "FROM ParticipationRequest AS r " +
+            "WHERE r.status = :status " +
+            "GROUP BY (r.event)")
+    List<ConfirmedRequests> findAllByStatus(@Param("status")RequestStatus status);
 }
