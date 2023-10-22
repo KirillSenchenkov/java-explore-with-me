@@ -22,19 +22,23 @@ services:
       - POSTGRES_PASSWORD=root
 
   ewm-service:
-    image: amazoncorretto:11
-    ports:
-       - "8080:8080"
-    depends_on:
-      - ewm-db
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/ewm-service
+      build: ./main-service
+      image: main-service
+      container_name: main-container
+      ports:
+        - "8080:8080"
+      depends_on:
+        - ewm-db
+        - stats-server
+      environment:
+        - CLIENT_URL=http://stats-server:9090
+        - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm-main
   ewm-db:
     image: postgres:14-alpine
     container_name: ewm-service-db-container
     ports:
       - "6545:5432"
     environment:
-      - POSTGRES_DB=ewm-service
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=ewm-main
+      - POSTGRES_USER=main
+      - POSTGRES_PASSWORD=main

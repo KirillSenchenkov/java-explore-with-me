@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.stats.dto.EndpointHitDto;
 import ru.practicum.ewm.stats.dto.ViewStats;
 import ru.practicum.ewm.stats.server.exception.WrongTimestampException;
+import ru.practicum.ewm.stats.server.model.EndpointHit;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,9 +20,10 @@ public class StatsService {
 
     private final StatsRepository repository;
 
-    public void createHit(EndpointHitDto dto) {
+    public EndpointHitDto createHit(EndpointHitDto dto) {
         log.debug("Статистика добавлена в базу данных");
-        repository.save(EndpointMapper.dtoToHit(dto));
+        EndpointHit endpointHit = repository.save(EndpointMapper.dtoToHit(dto));
+        return EndpointMapper.hitToDto(endpointHit);
     }
 
     @Transactional(readOnly = true)
