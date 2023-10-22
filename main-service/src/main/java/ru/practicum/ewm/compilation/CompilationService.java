@@ -43,11 +43,12 @@ public class CompilationService {
             Map<Long, Long> confirmedRequests = requestRepository.findAllByEventIdInAndStatus(ids, CONFIRMED)
                     .stream()
                     .collect(Collectors.toMap(ConfirmedRequests::getEvent, ConfirmedRequests::getCount));
-            compilationDto.setEvents(compilation.getEvents().stream()
+            return new CompilationDto(compilationDto.getId(),compilation.getEvents().stream()
                     .map(event -> EventMapper.eventToEventShortDto(event, confirmedRequests.get(event.getId())))
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList()), compilationDto.getPinned(), compilationDto.getTitle());
+        } else {
+            return compilationDto;
         }
-        return compilationDto;
     }
 
     public CompilationDto updateCompilation(Long compId, UpdateCompilationRequest updateCompilation) {
@@ -73,9 +74,9 @@ public class CompilationService {
             Map<Long, Long> confirmedRequests = requestRepository.findAllByEventIdInAndStatus(ids, CONFIRMED)
                     .stream()
                     .collect(Collectors.toMap(ConfirmedRequests::getEvent, ConfirmedRequests::getCount));
-            compilationDto.setEvents(compilation.getEvents().stream()
+            return new CompilationDto(compilationDto.getId(),compilation.getEvents().stream()
                     .map(event -> EventMapper.eventToEventShortDto(event, confirmedRequests.get(event.getId())))
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList()), compilationDto.getPinned(), compilationDto.getTitle());
         }
         return compilationDto;
     }
@@ -102,11 +103,14 @@ public class CompilationService {
                     Map<Long, Long> confirmedRequests = sortedConfirmedRequests
                             .stream()
                             .collect(Collectors.toMap(ConfirmedRequests::getEvent, ConfirmedRequests::getCount));
-                    compilationDto.setEvents(compilation.getEvents().stream()
+                    CompilationDto compilationDtoWithEvents = new CompilationDto(compilationDto.getId(),
+                            compilation.getEvents().stream()
                             .map(event -> EventMapper.eventToEventShortDto(event, confirmedRequests.get(event.getId())))
-                            .collect(Collectors.toList()));
+                            .collect(Collectors.toList()), compilationDto.getPinned(), compilationDto.getTitle());
+                    result.add(compilationDtoWithEvents);
+                } else {
+                    result.add(compilationDto);
                 }
-                result.add(compilationDto);
             }
             return result;
         } else {
@@ -128,11 +132,15 @@ public class CompilationService {
                     Map<Long, Long> confirmedRequests = sortedConfirmedRequests
                             .stream()
                             .collect(Collectors.toMap(ConfirmedRequests::getEvent, ConfirmedRequests::getCount));
-                    compilationDto.setEvents(compilation.getEvents().stream()
-                            .map(event -> EventMapper.eventToEventShortDto(event, confirmedRequests.get(event.getId())))
-                            .collect(Collectors.toList()));
+                    CompilationDto compilationDtoWithEvents = new CompilationDto(compilationDto.getId(),
+                            compilation.getEvents().stream()
+                                    .map(event -> EventMapper
+                                            .eventToEventShortDto(event, confirmedRequests.get(event.getId())))
+                                    .collect(Collectors.toList()), compilationDto.getPinned(), compilationDto.getTitle());
+                    result.add(compilationDtoWithEvents);
+                } else {
+                    result.add(compilationDto);
                 }
-                result.add(compilationDto);
             }
             return result;
         }
@@ -147,9 +155,9 @@ public class CompilationService {
             Map<Long, Long> confirmedRequests = requestRepository.findAllByEventIdInAndStatus(ids, CONFIRMED)
                     .stream()
                     .collect(Collectors.toMap(ConfirmedRequests::getEvent, ConfirmedRequests::getCount));
-            compilationDto.setEvents(compilation.getEvents().stream()
+            return new CompilationDto(compilationDto.getId(),compilation.getEvents().stream()
                     .map(event -> EventMapper.eventToEventShortDto(event, confirmedRequests.get(event.getId())))
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList()), compilationDto.getPinned(), compilationDto.getTitle());
         }
         return compilationDto;
     }
@@ -161,6 +169,6 @@ public class CompilationService {
 
     private Compilation getCompilation(Long compilationId) {
         return compilationRepository.findById(compilationId).orElseThrow(() ->
-                new NotFoundException("Compilation id=" + compilationId + " not found"));
+                new NotFoundException("Компиляция не найдена"));
     }
 }

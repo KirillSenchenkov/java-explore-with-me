@@ -1,4 +1,4 @@
-package ru.practicum.ewm.request.model;
+package ru.practicum.ewm.comment.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -6,10 +6,8 @@ import lombok.NoArgsConstructor;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.user.model.User;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -19,26 +17,30 @@ import javax.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "comments")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "requests")
-public class ParticipationRequest {
+public class Comment {
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDateTime created;
+    @Column(nullable = false)
+    private String text;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id")
+    @ManyToOne
+    @JoinColumn(name = "author_id", nullable = false)
+    private User author;
+
+    @ManyToOne
+    @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requester_id")
-    private User requester;
+    @Column(nullable = false)
+    private LocalDateTime created;
 
-    @Enumerated(EnumType.STRING)
-    private RequestStatus status;
+    private LocalDateTime edited;
 }

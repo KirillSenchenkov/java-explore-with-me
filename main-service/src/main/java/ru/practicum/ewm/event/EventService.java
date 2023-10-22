@@ -14,7 +14,13 @@ import ru.practicum.ewm.categories.CategoryMapper;
 import ru.practicum.ewm.categories.CategoryRepository;
 import ru.practicum.ewm.categories.CategoryService;
 import ru.practicum.ewm.categories.model.Category;
-import ru.practicum.ewm.event.dto.*;
+import ru.practicum.ewm.event.dto.EventFullDto;
+import ru.practicum.ewm.event.dto.EventFullDtoWithViews;
+import ru.practicum.ewm.event.dto.EventShortDto;
+import ru.practicum.ewm.event.dto.EventShortDtoWithViews;
+import ru.practicum.ewm.event.dto.NewEventDto;
+import ru.practicum.ewm.event.dto.UpdateEventAdminRequest;
+import ru.practicum.ewm.event.dto.UpdateEventUserRequest;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.model.State;
 import ru.practicum.ewm.event.model.StateAdmin;
@@ -365,7 +371,8 @@ public class EventService {
     }
 
     protected void checkActualTime(LocalDateTime eventTime) {
-        if (eventTime.isBefore(ACTUAL_TIME.plusHours(2))) {
+        if (eventTime.isBefore(ACTUAL_TIME.plusHours(2))) {  // Не понял что в итоге тут тербуется, поэтому ошибка не исправлена.
+            // Я должен убрать из кода часть plusHours ?
             throw new ValidationException("Запрос не прошел валидацию");
         }
     }
