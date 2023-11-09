@@ -2,7 +2,11 @@ package ru.practicum.ewm.event;
 
 import lombok.experimental.UtilityClass;
 import ru.practicum.ewm.categories.CategoryMapper;
-import ru.practicum.ewm.event.dto.*;
+import ru.practicum.ewm.event.dto.EventFullDto;
+import ru.practicum.ewm.event.dto.EventFullDtoWithViews;
+import ru.practicum.ewm.event.dto.EventShortDto;
+import ru.practicum.ewm.event.dto.EventShortDtoWithViews;
+import ru.practicum.ewm.event.dto.NewEventDto;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.location.LocationMapper;
 import ru.practicum.ewm.user.UserMapper;

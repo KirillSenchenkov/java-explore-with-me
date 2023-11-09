@@ -2,18 +2,14 @@ package ru.practicum.ewm.request.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import ru.practicum.ewm.request.model.RequestStatus;
 
 import java.util.List;
 
 @Getter
-@Setter
 @AllArgsConstructor
-@NoArgsConstructor
-public class EventRequestStatusUpdateRequest {
-    private List<Long> requestIds;
+public final class EventRequestStatusUpdateRequest {
+    private final List<Long> requestIds;
 
-    private RequestStatus status;
+    private final RequestStatus status;
 }

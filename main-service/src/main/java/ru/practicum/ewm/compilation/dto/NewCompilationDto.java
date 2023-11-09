@@ -2,14 +2,12 @@ package ru.practicum.ewm.compilation.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.List;
 
 @Getter
-@Setter
 @AllArgsConstructor
 public final class NewCompilationDto {
 
@@ -19,7 +17,7 @@ public final class NewCompilationDto {
 
     @NotBlank
     @Size(min = 1, max = 50)
-    private String title;
+    private final String title;
 
     public Boolean getPinned() {
         return pinned;
